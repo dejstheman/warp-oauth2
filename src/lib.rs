@@ -19,7 +19,6 @@ pub trait Context {
     fn audience(&self) -> String;
     fn issuer(&self) -> String;
     fn pubkey(&self, kid: &str) -> Vec<u8>;
-    fn cookie_name(&self) -> String;
 }
 
 // Abstraction of the subject of the intended operation (the user, the identity)
