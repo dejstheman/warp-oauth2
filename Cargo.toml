@@ -3,7 +3,7 @@ name = "warp_oauth2"
 version = "0.1.0"
 authors = ["Jan Algermissen <algermissen@acm.org>"]
 edition = "2018"
-license = "Apache-2"
+license = "Apache-2.0"
 description = "Filters and more to work with oauth2 in warp projects."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
