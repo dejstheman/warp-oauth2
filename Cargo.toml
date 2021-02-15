@@ -1,0 +1,20 @@
+[package]
+name = "warp_oauth2"
+version = "0.1.0"
+authors = ["Jan Algermissen <algermissen@acm.org>"]
+edition = "2018"
+license = "Apache-2"
+description = "Filters and more to work with oauth2 in warp projects."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "1.0"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+jsonwebtoken = "7.2.0"
+futures = "0.3.7"
+http = "0.2"
+warp = "0.3.0"
+#hyper = "0.14.2"
