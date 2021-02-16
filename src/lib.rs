@@ -7,6 +7,7 @@ use std::convert::Infallible;
 use error::*;
 
 pub mod error;
+pub use error::Error;
 
 
 #[derive(Debug, Serialize, Deserialize)]
