@@ -1,6 +1,6 @@
 [package]
 name = "warp_oauth2"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Jan Algermissen <algermissen@acm.org>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -18,4 +18,4 @@ jsonwebtoken = "7.2.0"
 futures = "0.3.7"
 http = "0.2"
 warp = "0.3.0"
-#hyper = "0.14.2"
+headers = "0.3.3"
