@@ -10,6 +10,11 @@ pub enum Error {
         back: Option<String>,
         scope: Option<Vec<String>>,
     },
+    InvalidRequest {
+        realm: String,
+        scope: Option<Vec<String>>,
+        description: String,
+    },
     InvalidToken {
         realm: String,
         scope: Option<Vec<String>>,
@@ -40,6 +45,16 @@ impl TryInto<HeaderValue> for &Error {
             Error::MissingAuthentication { realm, scope, .. } => {
                 format!(r#"Bearer realm="{}" scope="{}""#, realm, scopes(scope))
             }
+            Error::InvalidRequest {
+                realm,
+                scope,
+                description,
+            } => format!(
+                r#"Bearer realm="{}" scope="{}" error_code="invalid_request" error_description="{}""#,
+                realm,
+                scopes(scope),
+                description
+            ),
             Error::InvalidToken {
                 realm,
                 scope,
@@ -65,11 +80,45 @@ impl TryInto<HeaderValue> for &Error {
     }
 }
 
+pub(crate) fn missing_authentication(
+    realm: String,
+    back: Option<String>,
+    scope: Option<Vec<String>>,
+) -> warp::Rejection {
+    Error::MissingAuthentication { realm, back, scope }.into_rejection()
+}
+
+pub(crate) fn invalid_token(
+    realm: String,
+    _back: Option<String>,
+    scope: Option<Vec<String>>,
+    description: String,
+) -> warp::Rejection {
+    Error::InvalidToken {
+        realm,
+        scope,
+        description,
+    }
+    .into_rejection()
+}
+pub(crate) fn _invalid_request(
+    realm: String,
+    scope: Option<Vec<String>>,
+    description: String,
+) -> warp::Rejection {
+    Error::InvalidToken {
+        realm,
+        scope,
+        description,
+    }
+    .into_rejection()
+}
+
 // Helper function for turning optional scopes list into
 // arg to format!() when constructing the redirect URI
 fn scopes(scopes: &Option<Vec<String>>) -> String {
     // TODO Try to do this without the clone
     let s = scopes.clone();
-    // return "" or scopes="a,b,c"
-    s.map_or("".into(), |v| format!(r#"scope="{}""#, v.join(",")))
+    // return "" or scope="a b c"
+    s.map_or("".into(), |v| format!(r#"scope="{}""#, v.join(" ")))
 }

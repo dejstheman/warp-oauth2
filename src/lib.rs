@@ -13,9 +13,7 @@ pub use error::Error;
 pub trait Context {
     fn audience(&self) -> String;
     fn issuer(&self) -> String;
-    fn pubkey(&self, kid: &str) -> Vec<u8>;
-    fn err_no_token(&self, back: Option<String>) -> Error;
-    fn err_invalid_token(&self, cause: String) -> Error;
+    fn pubkey(&self, kid: &str) -> Option<Vec<u8>>;
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -120,17 +118,24 @@ async fn validate<T: Context + Clone>(
         ..Validation::default()
     };
     match maybe_token {
-        None => Err(provider
-            .err_no_token(request_path_and_query)
-            .into_rejection()),
+        None => Err(error::missing_authentication(
+            "aply".into(),
+            request_path_and_query,
+            None,
+        )),
         Some(token) => {
             let header = jsonwebtoken::decode_header(&token).expect("TODO");
             match header.kid {
-                None => Err(provider
-                    .err_no_token(request_path_and_query)
-                    .into_rejection()),
+                None => {
+                    // TODO wrong error
+                    Err(error::missing_authentication(
+                        "aply".into(),
+                        request_path_and_query,
+                        None,
+                    ))
+                }
                 Some(kid) => {
-                    let pubkey = provider.pubkey(&kid);
+                    let pubkey = provider.pubkey(&kid).expect("TODO");
                     match decode::<Claims>(
                         &token,
                         &DecodingKey::from_rsa_pem(&pubkey).unwrap(),
@@ -139,9 +144,12 @@ async fn validate<T: Context + Clone>(
                         Ok(tokdat) => Ok(Principal {
                             id: tokdat.claims.sub,
                         }),
-                        Err(err) => {
-                            Err(provider.err_invalid_token(err.to_string()).into_rejection())
-                        }
+                        Err(err) => Err(error::invalid_token(
+                            "aply".into(),
+                            request_path_and_query,
+                            None,
+                            err.to_string(),
+                        )),
                     }
                 }
             }
